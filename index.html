@@ -143,6 +143,14 @@ main.map-only{grid-template-columns:1fr}
 .amen-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 .amen-pick label{display:flex;gap:6px;align-items:center;font-weight:400;margin:0;border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer}
 
+.chat{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:45;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.chat-btn{display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:12px 18px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(16,24,40,.25)}
+.chat-btn:hover{background:#185a4a}
+.chat-btn svg{width:18px;height:18px;fill:#fff}
+.chat-menu{width:min(300px,calc(100vw - 32px));background:#fff;border-radius:16px;padding:16px;box-shadow:0 12px 40px rgba(16,24,40,.25);display:flex;flex-direction:column;gap:8px}
+.chat-menu .btn{display:block;text-align:center;text-decoration:none;width:100%}
+.chat-menu .btn.wa{background:#1f8f4e;border-color:#1f8f4e;color:#fff}
+.chat-about{margin:0;font-size:13px;background:var(--brand-2);color:var(--brand);border-radius:8px;padding:6px 10px}
 footer{border-top:1px solid var(--line);background:#fff;color:var(--muted);font-size:13px}
 footer .inner{max-width:1400px;margin:0 auto;padding:20px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 
@@ -293,6 +301,19 @@ const PAYMENTS = {
   applicationFee: { amount: 50, link: "" },
   moveIn:         { link: "" },
   depositMonths:  1,
+};
+
+/* ---------- Customer chat: fill in one or both ----------
+   tawk:     free live chat from tawk.to. After signing up, go to Administration >
+             Chat Widget and copy the two IDs from the link https://embed.tawk.to/<propertyId>/<widgetId>.
+             You answer chats in the tawk.to app (phone or computer).
+   whatsapp: your WhatsApp number in international format, digits only (e.g. "2348012345678").
+   hours:    optional text shown in the chat menu, e.g. "Mon–Sat, 9am–7pm".
+   The chat button stays hidden until at least one of tawk or whatsapp is filled in. */
+const CHAT = {
+  tawk:     { propertyId: "", widgetId: "" },
+  whatsapp: "",
+  hours:    "",
 };
 
 /* ---------- State ---------- */
@@ -541,6 +562,7 @@ function openDetail(id){
         <label for="cMove">Move-in date</label><input id="cMove" type="date">
         <label for="cMsg">Message</label><textarea id="cMsg">Hi, I'm interested in ${esc(l.addr)}. Is it still available?</textarea>
         <button class="btn primary" style="width:100%;margin-top:12px" type="submit">Send request</button>
+        ${chatReady() ? `<button class="btn" style="width:100%;margin-top:8px" type="button" data-chat="${l.id}">Chat about this house</button>` : ""}
         <button class="btn" style="width:100%;margin-top:8px" type="button" data-fav="${l.id}" aria-pressed="${favs.has(l.id)}">${favs.has(l.id)?"♥ Saved":"♡ Save house"}</button>
       </form>
       ${payBox(l)}
@@ -672,8 +694,68 @@ $("#showFavs").addEventListener("click", ()=>{ onlyFavs=!onlyFavs; $("#showFavs"
 $("#openList").addEventListener("click", openListForm);
 $("#yr").textContent = new Date().getFullYear();
 
+/* ---------- Customer chat ---------- */
+const hasTawk = () => !!(CHAT.tawk.propertyId && CHAT.tawk.widgetId);
+const waNumber = () => String(CHAT.whatsapp||"").replace(/\D/g,"");
+function chatReady(){ return hasTawk() || waNumber().length >= 8; }
+let chatAbout = null;   // the house a renter is asking about, if any
+function waLink(){
+  const msg = chatAbout ? `Hi Hearthstead, I'm interested in ${chatAbout.addr}, ${chatAbout.hood} (${fmt(chatAbout.price)}/mo). Is it still available?`
+                        : "Hi Hearthstead, I have a question about renting a house.";
+  return `https://wa.me/${waNumber()}?text=${encodeURIComponent(msg)}`;
+}
+function openLiveChat(){
+  if(!window.Tawk_API || !Tawk_API.maximize) { $("#chatNote").textContent = "Live chat is still loading. Try again in a moment."; $("#chatNote").hidden = false; return; }
+  if(chatAbout && Tawk_API.addTags) Tawk_API.addTags(["house-" + chatAbout.id], ()=>{});
+  Tawk_API.showWidget(); Tawk_API.maximize(); toggleChatMenu(false);
+}
+function toggleChatMenu(open){
+  const m = $("#chatMenu"); open = open ?? m.hidden; m.hidden = !open;
+  $("#chatBtn").setAttribute("aria-expanded", open);
+  if(open){
+    $("#chatAbout").textContent = chatAbout ? `About: ${chatAbout.title}` : "";
+    $("#chatAbout").hidden = !chatAbout; $("#chatNote").hidden = true;
+    const wa = $("#chatWa"); if(wa) wa.href = waLink();
+  }
+}
+function initChat(){
+  if(!chatReady()) return;
+  const el = document.createElement("div");
+  el.className = "chat";
+  el.innerHTML = `
+    <div class="chat-menu" id="chatMenu" hidden role="dialog" aria-label="Chat with Hearthstead">
+      <b>Chat with Hearthstead</b>
+      <p class="fine">Questions about a house, viewings or your application? Message us.</p>
+      <p class="chat-about" id="chatAbout" hidden></p>
+      ${hasTawk() ? `<button class="btn primary" type="button" id="chatLive">Start live chat</button>` : ""}
+      ${waNumber().length >= 8 ? `<a class="btn wa" id="chatWa" target="_blank" rel="noopener noreferrer" href="#">Chat on WhatsApp</a>` : ""}
+      ${CHAT.hours ? `<p class="fine">Hours: ${esc(CHAT.hours)}</p>` : ""}
+      <p class="fine" id="chatNote" hidden></p>
+    </div>
+    <button class="chat-btn" id="chatBtn" type="button" aria-expanded="false" aria-controls="chatMenu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg> Chat with us
+    </button>`;
+  document.body.appendChild(el);
+  $("#chatBtn").addEventListener("click", ()=>{ chatAbout = null; toggleChatMenu(); });
+  const live = $("#chatLive"); if(live) live.addEventListener("click", openLiveChat);
+  if(hasTawk()){
+    window.Tawk_API = window.Tawk_API || {}; window.Tawk_LoadStart = new Date();
+    Tawk_API.onLoad = () => Tawk_API.hideWidget();             // use our own button instead of tawk's bubble
+    Tawk_API.onChatMinimized = () => Tawk_API.hideWidget();
+    const s = document.createElement("script"); s.async = true; s.charset = "UTF-8"; s.setAttribute("crossorigin","*");
+    s.src = `https://embed.tawk.to/${encodeURIComponent(CHAT.tawk.propertyId)}/${encodeURIComponent(CHAT.tawk.widgetId)}`;
+    document.head.appendChild(s);
+  }
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-chat]"); if(!b) return;
+  chatAbout = listings.find(x=>x.id==b.dataset.chat) || null;
+  closeModal(); toggleChatMenu(true);
+});
+
 buildLand();
 render();
+initChat();
 </script>
 
 </body>

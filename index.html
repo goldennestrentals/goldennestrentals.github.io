@@ -4,202 +4,346 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Houses for rent across New York City. Search by neighborhood, price and bedrooms.">
-<meta property="og:title" content="Hearthstead · Houses for rent in New York">
+<meta property="og:title" content="Hearthstead · Whole houses for rent in New York City">
 <meta property="og:description" content="Houses for rent across New York City. Search by neighborhood, price and bedrooms.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f6f5c'/%3E%3Cpath d='M8 16 16 9l8 7v8h-5v-5h-6v5H8z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
 <title>Hearthstead</title>
 <style>
+/* Layout concept: photo-led hero with a floating search card, then a calm editorial grid of homes on warm-white stone; forest green carries actions, brass marks status. */
 :root{
-  --ink:#1d2433; --muted:#667085; --line:#e4e7ec; --bg:#f7f6f3; --card:#fff;
-  --brand:#1f6f5c; --brand-2:#e8f3ef; --accent:#e07a3f; --radius:14px;
-  --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
+  --ink:#16201c; --ink-2:#3c4a44; --muted:#6b7772; --line:#e3e6e1; --line-2:#d3d8d2;
+  --bg:#f7f7f4; --card:#ffffff; --stone:#eef0ec;
+  --brand:#1e4d3f; --brand-ink:#163b30; --brand-2:#e6efea; --brass:#a8823f; --brass-2:#f4ede0;
+  --danger:#a63d2f;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 1px 2px rgba(22,32,28,.05),0 8px 24px rgba(22,32,28,.06);
+  --shadow-lg:0 24px 60px rgba(22,32,28,.18);
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --header-h:68px;
 }
 *{box-sizing:border-box}
-body{margin:0;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;font:15px/1.6 var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:inherit}
+img{max-width:100%}
 [hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-.01em;text-wrap:balance;line-height:1.15}
+.section{padding-block:72px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.section-head h2{margin:6px 0 0;font-size:clamp(28px,3.4vw,40px)}
+.section-head p{margin:8px 0 0;color:var(--muted);max-width:56ch}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:10px 18px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap;text-decoration:none;transition:background .15s,border-color .15s,color .15s}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--stone)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.fav-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--brass);color:#fff;font-size:11px;font-weight:700}
 
 /* Header */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:#fff}
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1400px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px}
-.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.02em;text-decoration:none}
-.logo svg{width:30px;height:30px}
-.nav{margin-left:auto;display:flex;gap:6px;align-items:center}
-.btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600;white-space:nowrap}
-.btn:hover{border-color:#cfd4dc}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
-.btn.primary:hover{background:#185a4a}
-.btn.ghost{border-color:transparent}
-.fav-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:99px;background:var(--accent);color:#fff;font-size:12px;text-align:center}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(255,255,255,.94);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.top-inner{height:var(--header-h);display:flex;align-items:center;gap:28px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo svg{width:32px;height:32px;flex:none}
+.logo b{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.01em}
+.links{display:flex;gap:4px}
+.links a{text-decoration:none;font-size:14px;font-weight:600;color:var(--ink-2);padding:8px 12px;border-radius:999px}
+.links a:hover{background:var(--stone);color:var(--ink)}
+.nav{margin-left:auto;display:flex;gap:8px;align-items:center}
 
-/* Hero / search */
-.hero{background:linear-gradient(135deg,#1f6f5c 0%,#2c8a73 60%,#3c9d83 100%);color:#fff}
-.hero-inner{max-width:1400px;margin:0 auto;padding:36px 20px 28px}
-.hero h1{margin:0 0 4px;font-size:clamp(24px,3.4vw,38px);letter-spacing:-.02em}
-.hero p{margin:0 0 18px;opacity:.9}
-.searchbar{display:flex;gap:8px;background:#fff;border-radius:999px;padding:6px;box-shadow:var(--shadow);max-width:760px}
-.searchbar input{flex:1;border:0;outline:0;padding:10px 16px;border-radius:999px;min-width:0;color:var(--ink)}
-.searchbar .btn{padding:10px 22px}
+/* Hero */
+.hero{position:relative;min-height:min(78vh,640px);display:flex;align-items:flex-end;color:#fff;overflow:hidden;background:#24332d}
+.hero > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,22,19,.55) 0%,rgba(14,22,19,.15) 70%),linear-gradient(180deg,rgba(14,22,19,.45) 0%,rgba(14,22,19,.35) 40%,rgba(14,22,19,.85) 100%)}
+.hero h1,.hero p.lead,.hero .eyebrow,.hero-meta{text-shadow:0 1px 12px rgba(0,0,0,.25)}
+.hero-inner{position:relative;z-index:1;width:100%;padding-block:120px 48px}
+.hero .eyebrow{color:#e9d6ae}
+.hero h1{margin:10px 0 12px;font-size:clamp(38px,6vw,72px);max-width:15ch;font-weight:400}
+.hero h1 em{font-style:italic}
+.hero p.lead{margin:0 0 28px;font-size:clamp(16px,1.6vw,19px);max-width:52ch;opacity:.92}
+.search-card{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:4px;background:#fff;color:var(--ink);border-radius:20px;padding:8px;box-shadow:var(--shadow-lg);max-width:900px}
+.search-card label{display:flex;flex-direction:column;gap:2px;padding:8px 16px;border-radius:14px;cursor:text}
+.search-card label + label{border-left:1px solid var(--line)}
+.search-card label:hover{background:var(--stone)}
+.search-card span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.search-card input,.search-card select{border:0;outline:0;background:transparent;padding:2px 0;font-size:15px;font-weight:600;min-width:0;width:100%}
+.search-card .btn{border-radius:14px;padding:0 28px;font-size:15px}
+.hero-meta{display:flex;gap:10px 28px;flex-wrap:wrap;margin-top:22px;font-size:14px;opacity:.9}
+.hero-meta span{display:flex;align-items:center;gap:8px}
+.hero-meta span::before{content:"";width:6px;height:6px;border-radius:50%;background:#e9d6ae}
+.credit{position:absolute;right:16px;bottom:10px;z-index:1;font-size:11px;opacity:.65}
 
 /* Filters */
-.filters{position:sticky;top:61px;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
-.filters-inner{max-width:1400px;margin:0 auto;padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.filters select,.filters input[type=number]{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;cursor:pointer}
-.filters input[type=number]{width:110px;cursor:text}
-.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;user-select:none}
-.chip[aria-pressed=true]{background:var(--brand-2);border-color:var(--brand);color:var(--brand);font-weight:600}
+.filters{position:sticky;top:calc(var(--header-h) + env(safe-area-inset-top,0px));z-index:20;background:rgba(247,247,244,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.filters-inner{padding-block:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input[type=number]{border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:14px}
+.filters input[type=number]{width:112px;cursor:text}
+.chip{border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;user-select:none;font-size:14px}
+.chip:hover{border-color:var(--ink-2)}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
 .filters .spacer{flex:1}
-.view-toggle{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
-.view-toggle button{border:0;background:#fff;padding:7px 14px;cursor:pointer}
+.view-toggle{display:flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:#fff}
+.view-toggle button{border:0;background:transparent;padding:8px 14px;cursor:pointer;font-size:14px}
 .view-toggle button[aria-pressed=true]{background:var(--ink);color:#fff}
 
-/* Layout */
-main{max-width:1400px;margin:0 auto;padding:16px 20px 60px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}
+/* Results layout */
+main{padding-block:28px 72px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px}
 main.list-only{grid-template-columns:1fr}
 main.list-only .map-wrap{display:none}
 main.map-only .results{display:none}
 main.map-only{grid-template-columns:1fr}
-.map-wrap{position:sticky;top:122px;height:calc(100vh - 140px);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#dfeae4}
-.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 12px}
-.results-head h2{margin:0;font-size:18px}
+.map-wrap{position:sticky;top:calc(var(--header-h) + 76px);height:calc(100vh - var(--header-h) - 100px);border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:#dfeae4}
+.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 18px}
+.results-head h2{margin:0;font-size:28px}
 .results-head .muted{color:var(--muted);font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:28px 20px}
+main.list-only .grid{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
 
 /* Card */
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;outline:2px solid transparent}
-.card:hover,.card.hl{transform:translateY(-2px);box-shadow:0 8px 28px rgba(16,24,40,.12)}
-.card.hl{outline-color:var(--brand)}
-.card .ph{position:relative;aspect-ratio:16/10;overflow:hidden}
-.card .ph svg{width:100%;height:100%;display:block}
-.badge{position:absolute;left:10px;top:10px;background:#fff;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700}
-.badge.new{background:var(--accent);color:#fff}
-.badge.hot{background:#b42318;color:#fff}
-.card .ph img,.modal .gallery img{width:100%;height:100%;object-fit:cover;display:block}
-.modal .gallery.one{grid-template-columns:1fr;grid-template-rows:1fr}
-.pop{font-size:12px;color:var(--muted);margin-top:2px}
-.heart{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer}
+.card{cursor:pointer;display:flex;flex-direction:column;gap:12px;background:transparent;border-radius:var(--radius)}
+.card .ph{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:var(--radius);background:var(--stone)}
+.card .ph img,.card .ph svg{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.card:hover .ph img,.card.hl .ph img{transform:scale(1.04)}
+.card.hl .ph{box-shadow:0 0 0 3px var(--brand)}
+.badge{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.95);color:var(--ink);border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.badge.new{background:var(--brand);color:#fff}
+.badge.hot{background:var(--brass);color:#fff}
+.heart{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.95);display:grid;place-items:center;cursor:pointer;transition:transform .15s}
+.heart:hover{transform:scale(1.08)}
 .heart svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:2}
-.heart[aria-pressed=true] svg{fill:var(--accent);stroke:var(--accent)}
-.card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
-.price{font-size:20px;font-weight:800;letter-spacing:-.01em}
-.price small{font-size:13px;font-weight:500;color:var(--muted)}
-.specs{display:flex;gap:10px;color:var(--ink);font-size:14px}
+.heart[aria-pressed=true] svg{fill:var(--danger);stroke:var(--danger)}
+.card .body{display:flex;flex-direction:column;gap:3px;padding:0 2px}
+.price{font-family:var(--display);font-size:24px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.2}
+.price small{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted)}
+.specs{display:flex;gap:6px;color:var(--ink-2);font-size:14px}
+.specs b{font-weight:700;color:var(--ink)}
 .addr{color:var(--muted);font-size:14px}
-.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.tag{font-size:12px;background:#f2f4f7;border-radius:6px;padding:2px 8px;color:#475467}
-.empty{padding:40px;text-align:center;color:var(--muted);background:#fff;border-radius:var(--radius)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--ink-2);background:#fff}
+.pop{font-size:12px;color:var(--brass);font-weight:600;margin-top:2px}
+.empty{padding:48px;text-align:center;color:var(--muted);background:#fff;border:1px dashed var(--line-2);border-radius:var(--radius);grid-column:1/-1}
 
 /* Map */
 .map-svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none}
 .map-svg:active{cursor:grabbing}
-.map-svg .water{fill:#bcd7e6}
-.map-svg .land{fill:#eef1ea;stroke:#9fb3a3;stroke-width:1;vector-effect:non-scaling-stroke}
-.map-svg .boro{font-size:12px;font-weight:700;letter-spacing:2px;fill:#7d8f80;pointer-events:none}
-.pin path{fill:var(--brand)}
-.map-zoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;background:#fff;border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
-.map-zoom button{width:36px;height:36px;border:0;border-bottom:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer}
-.map-zoom button:last-child{border-bottom:0}
-.map-zoom button:hover{background:#f2f4f7}
+.map-svg .water{fill:#c9dbe3}
+.map-svg .land{fill:#f3f2ec;stroke:#a9b8ad;stroke-width:1;vector-effect:non-scaling-stroke}
+.map-svg .boro{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:3px;fill:#8a978f;pointer-events:none}
 .pin{cursor:pointer}
-.pin rect{fill:#fff;stroke:var(--brand);stroke-width:1.5}
-.pin text{font-size:12px;font-weight:700;fill:var(--ink)}
-.pin:hover rect,.pin.hl rect{fill:var(--brand)}
+.pin rect{fill:#fff;stroke:var(--ink);stroke-width:1}
+.pin path{fill:var(--ink)}
+.pin text{font-family:var(--sans);font-size:12px;font-weight:700;fill:var(--ink)}
+.pin:hover rect,.pin.hl rect{fill:var(--brand);stroke:var(--brand)}
+.pin:hover path,.pin.hl path{fill:var(--brand)}
 .pin:hover text,.pin.hl text{fill:#fff}
-.map-legend{position:absolute;left:12px;bottom:12px;background:#fff;border-radius:8px;padding:6px 10px;font-size:12px;color:var(--muted);box-shadow:var(--shadow)}
+.map-zoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.map-zoom button{width:38px;height:38px;border:0;border-bottom:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer}
+.map-zoom button:last-child{border-bottom:0}
+.map-zoom button:hover{background:var(--stone)}
+.map-legend{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.95);border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);box-shadow:var(--shadow)}
+
+/* Boroughs */
+.boros{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.boro-tile{position:relative;border:1px solid var(--line);background:#fff;border-radius:var(--radius);padding:22px 20px 20px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:170px;transition:border-color .15s,transform .15s,box-shadow .15s}
+.boro-tile:hover{border-color:var(--ink-2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.boro-tile h3{margin:auto 0 0;font-size:24px}
+.boro-tile .n{font-size:13px;color:var(--muted)}
+.boro-tile .from{font-size:13px;font-weight:700;color:var(--brand)}
+.boro-tile .arrow{position:absolute;right:18px;top:18px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:14px}
+
+/* How it works */
+.how{background:var(--brand);color:#f2f5f2}
+.how .eyebrow{color:#e9d6ae}
+.how .section-head p{color:#c8d6cf}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;counter-reset:step}
+.step{border-top:1px solid rgba(255,255,255,.22);padding-top:20px;counter-increment:step}
+.step::before{content:"Step " counter(step);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#e9d6ae}
+.step h3{margin:10px 0 8px;font-size:24px;color:#fff}
+.step p{margin:0;color:#c8d6cf;max-width:40ch}
+
+/* Owners */
+.owners{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;border-radius:24px;overflow:hidden;background:var(--brass-2);border:1px solid #eadfca}
+.owners img{width:100%;height:100%;object-fit:cover;min-height:320px;display:block}
+.owners .txt{padding:48px 44px;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.owners h2{margin:0;font-size:clamp(28px,3vw,38px)}
+.owners p{margin:0;color:var(--ink-2)}
+.owners ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.owners li{display:flex;gap:10px;align-items:baseline}
+.owners li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--brass);transform:translateY(-2px)}
+.owners .btn{align-self:flex-start;margin-top:6px}
+
+/* FAQ */
+.faq{max-width:860px}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:20px 40px 20px 0;font-family:var(--display);font-size:21px;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:4px;top:16px;font-family:var(--sans);font-size:24px;font-weight:300;color:var(--muted)}
+.faq details[open] summary::after{content:"−"}
+.faq details p{margin:0 0 20px;color:var(--ink-2);max-width:68ch}
+
+/* Footer */
+footer{background:var(--ink);color:#c5ccc8;font-size:14px}
+.foot{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:32px;padding-block:56px 32px}
+.foot .logo b{color:#fff}
+.foot p{margin:12px 0 0;max-width:36ch;color:#9aa49f}
+.foot h4{margin:0 0 12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.foot a,.foot button.linkish{display:block;color:#c5ccc8;text-decoration:none;padding:4px 0;background:none;border:0;cursor:pointer;font-size:14px;text-align:left}
+.foot a:hover,.foot button.linkish:hover{color:#fff}
+.legal{border-top:1px solid rgba(255,255,255,.12);padding-block:20px 28px;display:flex;gap:12px 24px;flex-wrap:wrap;justify-content:space-between;font-size:12px;color:#8d9792}
 
 /* Modal */
-.overlay{position:fixed;inset:0;background:rgba(16,24,40,.55);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 16px}
-.modal{background:#fff;border-radius:18px;max-width:960px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.modal .gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:4px;height:min(56vw,380px)}
+.overlay{position:fixed;inset:0;background:rgba(14,22,19,.6);backdrop-filter:blur(3px);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:32px 16px}
+.modal{background:#fff;border-radius:24px;max-width:1040px;width:100%;overflow:hidden;box-shadow:var(--shadow-lg)}
+.modal .gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:4px;height:min(56vw,440px)}
 .modal .gallery > div:first-child{grid-row:1/3}
-.modal .gallery svg{width:100%;height:100%;display:block}
-.modal .close{position:absolute;right:12px;top:12px}
-.modal-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;padding:22px 24px 28px}
-.modal h2{margin:0;font-size:24px;letter-spacing:-.01em}
-.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
-.fact{background:#f7f8fa;border-radius:10px;padding:10px;text-align:center}
-.fact b{display:block;font-size:18px}
-.fact span{font-size:12px;color:var(--muted)}
-.amen{columns:2;padding-left:18px;margin:8px 0}
-.contact{border:1px solid var(--line);border-radius:14px;padding:16px;align-self:start;position:sticky;top:0}
-.contact label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
-.contact input,.contact textarea,.form input,.form select,.form textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
-.contact textarea{min-height:80px;resize:vertical}
-.side{display:flex;flex-direction:column;gap:14px;align-self:start}
-.side .contact{position:static}
-.pay{border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.modal .gallery img,.modal .gallery svg{width:100%;height:100%;object-fit:cover;display:block}
+.modal .gallery.one{grid-template-columns:1fr;grid-template-rows:1fr}
+.modal .close{position:absolute;right:16px;top:16px;background:rgba(255,255,255,.95);border-color:transparent}
+.modal-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:40px;padding:32px 36px 40px}
+.modal h2{margin:0;font-size:clamp(26px,3vw,34px)}
+.modal h3{font-size:21px;margin:28px 0 8px}
+.modal .price{font-size:30px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:20px 0;border:1px solid var(--line);border-radius:var(--radius)}
+.fact{padding:14px 10px;text-align:center}
+.fact + .fact{border-left:1px solid var(--line)}
+.fact b{display:block;font-family:var(--display);font-size:22px;font-weight:600}
+.fact span{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.amen{columns:2;padding-left:18px;margin:8px 0;color:var(--ink-2)}
+.amen li{margin-bottom:4px}
+.contact{border:1px solid var(--line);border-radius:var(--radius);padding:20px;align-self:start;box-shadow:var(--shadow)}
+.contact > b{font-family:var(--display);font-size:20px;font-weight:600}
+.contact label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.contact input,.contact textarea,.form input,.form select,.form textarea{width:100%;border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:10px 12px;background:#fff}
+.contact input:focus,.contact textarea:focus,.form input:focus,.form select:focus,.form textarea:focus{outline:2px solid var(--brand);outline-offset:0;border-color:var(--brand)}
+.contact textarea{min-height:84px;resize:vertical}
+.side{display:flex;flex-direction:column;gap:16px;align-self:start}
+.pay{border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.pay > b{font-family:var(--display);font-size:20px;font-weight:600;margin-bottom:4px}
 .pay-row{display:flex;justify-content:space-between;font-size:14px;font-variant-numeric:tabular-nums}
-.pay-row.total{border-top:1px solid var(--line);padding-top:8px;font-size:15px}
-.pay .btn{display:block;width:100%;text-align:center;text-decoration:none;margin-top:6px;white-space:normal}
-.btn[disabled]{opacity:.55;cursor:not-allowed}
+.pay-row.total{border-top:1px solid var(--line-2);padding-top:10px;font-size:15px}
+.pay .btn{display:flex;width:100%;text-align:center;margin-top:6px;white-space:normal}
 .fine{margin:4px 0 0;font-size:12px;color:var(--muted)}
-.ok{background:var(--brand-2);color:var(--brand);padding:12px;border-radius:10px;font-weight:600}
-.form{padding:24px}
+.ok{background:var(--brand-2);color:var(--brand);padding:14px;border-radius:var(--radius-sm);font-weight:600}
+.form{padding:32px}
+.form h2{font-size:30px}
 .form .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.form label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+.form label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
 .amen-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.amen-pick label{display:flex;gap:6px;align-items:center;font-weight:400;margin:0;border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer}
+.amen-pick label{display:flex;gap:6px;align-items:center;font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink);margin:0;border:1px solid var(--line-2);border-radius:99px;padding:6px 12px;cursor:pointer;font-size:14px}
 
+/* Chat */
 .chat{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:45;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-.chat-btn{display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:12px 18px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(16,24,40,.25)}
-.chat-btn:hover{background:#185a4a}
+.chat-btn{display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:13px 20px;background:var(--ink);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(14,22,19,.3)}
+.chat-btn:hover{background:var(--brand)}
 .chat-btn svg{width:18px;height:18px;fill:#fff}
-.chat-menu{width:min(300px,calc(100vw - 32px));background:#fff;border-radius:16px;padding:16px;box-shadow:0 12px 40px rgba(16,24,40,.25);display:flex;flex-direction:column;gap:8px}
-.chat-menu .btn{display:block;text-align:center;text-decoration:none;width:100%}
+.chat-menu{width:min(320px,calc(100vw - 32px));background:#fff;border-radius:20px;padding:20px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:10px}
+.chat-menu > b{font-family:var(--display);font-size:20px;font-weight:600}
+.chat-menu .btn{display:flex;width:100%}
 .chat-menu .btn.wa{background:#1f8f4e;border-color:#1f8f4e;color:#fff}
 .chat-about{margin:0;font-size:13px;background:var(--brand-2);color:var(--brand);border-radius:8px;padding:6px 10px}
-footer{border-top:1px solid var(--line);background:#fff;color:var(--muted);font-size:13px}
-footer .inner{max-width:1400px;margin:0 auto;padding:20px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 
+@media (max-width:1080px){
+  .links{display:none}
+  .boros{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .foot{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media (max-width:900px){
+  :root{--header-h:60px}
   main{grid-template-columns:1fr}
   main:not(.map-only) .map-wrap{display:none}
   main.map-only .map-wrap{position:relative;top:0;height:70vh}
-  .modal-body{grid-template-columns:1fr}
-  .filters{top:0;position:relative}
+  .modal-body{grid-template-columns:1fr;padding:24px 20px 28px;gap:24px}
+  .filters{position:relative;top:0}
   .nav .hide-sm{display:none}
+  .search-card{grid-template-columns:1fr 1fr}
+  .search-card label:first-child{grid-column:1/-1}
+  .search-card label + label{border-left:0}
+  .search-card label:nth-child(3){border-left:1px solid var(--line)}
+  .search-card .btn{grid-column:1/-1;padding:14px}
+  .steps{grid-template-columns:1fr}
+  .owners{grid-template-columns:1fr}
+  .owners img{min-height:220px;max-height:280px}
+  .owners .txt{padding:32px 24px}
+  .section{padding-block:56px}
 }
-@media (max-width:520px){
+@media (max-width:560px){
+  .boros{grid-template-columns:1fr 1fr}
+  .boro-tile{min-height:140px;padding:18px 16px}
+  .boro-tile h3{font-size:20px}
   .facts{grid-template-columns:repeat(2,1fr)}
+  .fact:nth-child(3){border-left:0}
+  .fact:nth-child(n+3){border-top:1px solid var(--line)}
   .amen{columns:1}
-  .modal .gallery{grid-template-columns:1fr;grid-template-rows:1fr}
+  .modal .gallery{grid-template-columns:1fr;grid-template-rows:1fr;height:62vw}
   .modal .gallery > div:not(:first-child){display:none}
+  .foot{grid-template-columns:1fr}
+  .hero-inner{padding-block:96px 32px}
+  .logo b{font-size:20px}
+  #openList{padding:9px 14px}
 }
 </style>
 </head>
 <body>
-
 <header class="top">
-  <div class="top-inner">
+  <div class="wrap top-inner">
     <a href="#" class="logo" aria-label="Hearthstead home">
-      <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#1f6f5c"/><path d="M8 16 16 9l8 7v8h-5v-5h-6v5H8z" fill="#fff"/><circle cx="22.5" cy="10.5" r="2.5" fill="#e07a3f"/></svg>
-      Hearthstead
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#1e4d3f"/><path d="M8 16.5 16 9.5l8 7V24h-5v-5h-6v5H8z" fill="#fff"/><path d="M21 8.5h2.5v4" stroke="#d9b977" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <b>Hearthstead</b>
     </a>
-    <nav class="nav">
-      <button class="btn ghost hide-sm" id="showFavs">Saved <span class="fav-count" id="favCount">0</span></button>
-      <button class="btn primary" id="openList">List your house</button>
+    <nav class="links" aria-label="Sections">
+      <a href="#homes">Homes</a>
+      <a href="#neighborhoods">Neighborhoods</a>
+      <a href="#how">How it works</a>
+      <a href="#owners">For owners</a>
+      <a href="#faq">FAQ</a>
     </nav>
+    <div class="nav">
+      <button class="btn ghost hide-sm" id="showFavs" type="button">Saved <span class="fav-count" id="favCount">0</span></button>
+      <button class="btn primary" id="openList" type="button">List your house</button>
+    </div>
   </div>
 </header>
 
 <section class="hero">
-  <div class="hero-inner">
-    <h1>Find a whole house to call home.</h1>
-    <p>Houses for rent across New York City — yards, driveways, and room to breathe.</p>
-    <form class="searchbar" id="searchForm" role="search">
-      <input id="q" type="search" placeholder="Neighborhood, borough, or ZIP (e.g. Astoria, Brooklyn, 10314)" aria-label="Search location">
-      <button class="btn primary" type="submit">Search</button>
+  <img src="img/h9.jpg" alt="" fetchpriority="high">
+  <div class="wrap hero-inner">
+    <div class="eyebrow">Whole-house rentals · New York City</div>
+    <h1>A house of your own, <em>in the city</em> you love.</h1>
+    <p class="lead">Detached homes, townhouses and duplexes across all five boroughs, with yards, driveways and room to grow.</p>
+    <form class="search-card" id="searchForm" role="search">
+      <label for="q"><span>Where</span><input id="q" type="search" placeholder="Neighborhood, borough or ZIP" autocomplete="off"></label>
+      <label for="heroBeds"><span>Bedrooms</span>
+        <select id="heroBeds"><option value="0">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select>
+      </label>
+      <label for="heroMax"><span>Max rent</span>
+        <select id="heroMax"><option value="">No max</option><option value="3000">$3,000</option><option value="4000">$4,000</option><option value="5000">$5,000</option><option value="7000">$7,000</option><option value="10000">$10,000</option></select>
+      </label>
+      <button class="btn primary" type="submit">Search homes</button>
     </form>
+    <div class="hero-meta"><span>Whole houses only</span><span>All five boroughs</span><span>Apply and pay online</span><span>Live chat with our team</span></div>
   </div>
+  <span class="credit">Example photo: QY Liu / Unsplash</span>
 </section>
 
-<div class="filters">
-  <div class="filters-inner">
-    <input type="number" id="minPrice" placeholder="Min $" min="0" step="100" aria-label="Minimum price">
-    <input type="number" id="maxPrice" placeholder="Max $" min="0" step="100" aria-label="Maximum price">
+<div class="browse">
+<div class="filters" id="homes">
+  <div class="wrap filters-inner">
+    <input type="number" id="minPrice" placeholder="Min $" min="0" step="100" aria-label="Minimum rent">
+    <input type="number" id="maxPrice" placeholder="Max $" min="0" step="100" aria-label="Maximum rent">
     <select id="beds" aria-label="Bedrooms">
       <option value="0">Any beds</option><option value="1">1+ bd</option><option value="2">2+ bd</option><option value="3">3+ bd</option><option value="4">4+ bd</option>
     </select>
@@ -226,7 +370,7 @@ footer .inner{max-width:1400px;margin:0 auto;padding:20px;display:flex;gap:16px;
   </div>
 </div>
 
-<main id="main">
+<main id="main" class="wrap">
   <section class="results">
     <div class="results-head">
       <h2 id="resultsTitle">Houses for rent in New York, NY</h2>
@@ -241,13 +385,96 @@ footer .inner{max-width:1400px;margin:0 auto;padding:20px;display:flex;gap:16px;
       <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
       <button type="button" data-zoom="reset" aria-label="Show all of New York">⤢</button>
     </div>
-    <div class="map-legend">Drag to move · scroll or pinch to zoom · tap a price to open</div>
+    <div class="map-legend">Drag to move · scroll or pinch to zoom</div>
   </aside>
 </main>
+</div>
 
-<footer><div class="inner"><span>© <span id="yr"></span> Hearthstead Rentals</span><span>Equal Housing Opportunity · Listings shown are sample data</span></div></footer>
+<section class="section" id="neighborhoods" style="padding-top:24px">
+  <div class="wrap">
+    <div class="section-head">
+      <div><div class="eyebrow">Neighborhoods</div><h2>Explore by borough</h2></div>
+      <p>From brownstone blocks in Brooklyn to quiet cul-de-sacs on Staten Island, every borough rents differently.</p>
+    </div>
+    <div class="boros" id="boros"></div>
+  </div>
+</section>
+
+<section class="section how" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div><div class="eyebrow">How it works</div><h2>From search to keys in three steps</h2></div>
+      <p>No brokers chasing you, no hidden steps. Everything happens here.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>Find your house</h3><p>Filter by borough, budget, bedrooms and must-haves like a yard or parking. Save favorites to compare later.</p></div>
+      <div class="step"><h3>Ask and tour</h3><p>Send a request or start a live chat about any house. We'll answer questions and set up a viewing.</p></div>
+      <div class="step"><h3>Apply and move in</h3><p>Pay the application fee online, then first month's rent and deposit through a secure checkout.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="owners">
+  <div class="wrap">
+    <div class="owners">
+      <img src="img/h14.jpg" alt="Brick house with a front lawn" loading="lazy">
+      <div class="txt">
+        <div class="eyebrow">For owners</div>
+        <h2>Rent out your house to people looking for exactly that.</h2>
+        <p>Hearthstead lists whole houses only, so your home reaches renters who want space, not a one-bedroom.</p>
+        <ul>
+          <li>Publish a listing in a few minutes</li>
+          <li>Renters reach you by request or live chat</li>
+          <li>Application fees and move-in costs paid online</li>
+        </ul>
+        <button class="btn primary" type="button" id="openList2">List your house</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" style="padding-top:8px">
+  <div class="wrap">
+    <div class="section-head"><div><div class="eyebrow">Questions</div><h2>Renting with Hearthstead</h2></div></div>
+    <div class="faq" id="faqList"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a href="#" class="logo" aria-label="Hearthstead home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#2c6655"/><path d="M8 16.5 16 9.5l8 7V24h-5v-5h-6v5H8z" fill="#fff"/><path d="M21 8.5h2.5v4" stroke="#d9b977" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <b>Hearthstead</b>
+      </a>
+      <p>Whole-house rentals across New York City.</p>
+    </div>
+    <div>
+      <h4>Boroughs</h4>
+      <button class="linkish" type="button" data-boro="Brooklyn">Brooklyn</button>
+      <button class="linkish" type="button" data-boro="Queens">Queens</button>
+      <button class="linkish" type="button" data-boro="Bronx">Bronx</button>
+      <button class="linkish" type="button" data-boro="Staten Island">Staten Island</button>
+      <button class="linkish" type="button" data-boro="Manhattan">Manhattan</button>
+    </div>
+    <div>
+      <h4>Renters</h4>
+      <a href="#homes">Browse homes</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+      <button class="linkish" type="button" id="footSaved">Saved houses</button>
+    </div>
+    <div>
+      <h4>Owners</h4>
+      <button class="linkish" type="button" id="footList">List your house</button>
+      <a href="#owners">Why Hearthstead</a>
+    </div>
+  </div>
+  <div class="wrap legal"><span>© <span id="yr"></span> Hearthstead Rentals · Equal Housing Opportunity</span><span>Listings and photos shown are examples</span></div>
+</footer>
 
 <div class="overlay" id="overlay" hidden></div>
+
 
 <script>
 /* ---------- Data (sample listings — replace with your own) ---------- */
@@ -752,6 +979,60 @@ document.addEventListener("click", e=>{
   chatAbout = listings.find(x=>x.id==b.dataset.chat) || null;
   closeModal(); toggleChatMenu(true);
 });
+
+/* ---------- Premium page sections ---------- */
+const BORO_BLURB = {
+  "Brooklyn":"Brownstones, rowhouses and leafy Victorian blocks.",
+  "Queens":"Detached homes with driveways, near the subway or LIRR.",
+  "Bronx":"Hillside homes in Riverdale and waterside Throggs Neck.",
+  "Staten Island":"The most space for the money, with yards to match.",
+  "Manhattan":"Rare whole townhouses on historic Harlem blocks.",
+};
+function renderBoros(){
+  $("#boros").innerHTML = Object.keys(BORO_BLURB).map(b=>{
+    const hs = listings.filter(l=>l.borough===b);
+    const from = hs.length ? Math.min(...hs.map(l=>l.price)) : 0;
+    return `<button class="boro-tile" type="button" data-boro="${b}">
+      <span class="arrow" aria-hidden="true">→</span>
+      <span class="n">${hs.length} ${hs.length===1?"house":"houses"}</span>
+      <h3>${b}</h3>
+      <span class="n">${BORO_BLURB[b]}</span>
+      ${from ? `<span class="from">From ${fmt(from)}/mo</span>` : ""}
+    </button>`;
+  }).join("");
+}
+function showBorough(b){
+  $("#borough").value = b; onlyFavs = false; render();
+  document.getElementById("homes").scrollIntoView();
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-boro]"); if(b) showBorough(b.dataset.boro);
+});
+
+const FAQ = [
+  ["What kinds of homes are on Hearthstead?", "Whole houses only: detached single-family homes, townhouses and two-family duplexes where you rent the entire unit. No shared rooms or studio apartments."],
+  ["How do I book a viewing?", "Open any house and send a request with your preferred move-in date, or tap Chat with us to talk to the team directly. We'll reply to arrange a time."],
+  ["What does it cost to apply?", `There's a ${fmt(PAYMENTS.applicationFee.amount)} application fee per house, paid online. Once you're approved, the first month's rent and a security deposit of ${PAYMENTS.depositMonths === 1 ? "one month's rent" : PAYMENTS.depositMonths + " months' rent"} are due before move-in.`],
+  ["Is it safe to pay online?", "Yes. Payments open on a secure checkout page run by our payment provider. Your card details are never entered on or stored by this website."],
+  ["Are pets allowed?", "It depends on the house. Use the Pet friendly filter to see only homes that accept pets, and ask the team about size or breed limits."],
+  ["I own a house. Can I list it?", "Yes. Tap List your house, add the details and it appears in search right away. Renters can then reach you by request or live chat."],
+];
+function renderFaq(){
+  $("#faqList").innerHTML = FAQ.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("");
+}
+
+$("#searchForm").addEventListener("submit", ()=>{
+  $("#beds").value = $("#heroBeds").value;
+  $("#maxPrice").value = $("#heroMax").value;
+  render();
+  document.getElementById("homes").scrollIntoView();
+});
+$("#openList2").addEventListener("click", openListForm);
+$("#footList").addEventListener("click", openListForm);
+$("#footSaved").addEventListener("click", ()=>{ onlyFavs = true; $("#showFavs").classList.add("primary"); render(); document.getElementById("homes").scrollIntoView(); });
+
+renderBoros();
+renderFaq();
 
 buildLand();
 render();

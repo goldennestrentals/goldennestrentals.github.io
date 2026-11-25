@@ -308,6 +308,11 @@ footer{margin-top:96px;background:var(--espresso);color:#cdbfa8;font-size:15px}
 .chat-about{margin:0;background:var(--honey);color:var(--gold-ink);font-size:13px;font-weight:600;padding:8px 12px;border-radius:10px}
 .btn.wa{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
 .btn.fbm{background:#1877f2;border-color:#1877f2;color:#fff}
+.panel .btn.wa + .btn.fbm,.panel .btn.fbm + .btn.wa{margin-top:8px}
+.demo-panel{position:relative;border-style:dashed;border-color:var(--gold)}
+.demo-tag{position:absolute;right:14px;top:14px;background:var(--gold);color:var(--espresso);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+.demo-out{margin:12px 0 0;background:var(--honey);border-radius:12px;padding:12px;font-size:14px;color:var(--ink-2)}
+.demo-out[hidden]{display:none}
 .panel .btn.wa + .btn.fbm{margin-top:8px}
 
 /* example labels + facts and features */
@@ -969,6 +974,9 @@ let drawPoly = null;                 // [[lat,lng],...] drawn on the map
 const compare = new Set(store.get("gn_compare", []).filter(id => listings.some(l => l.id === id)));
 let recent = store.get("gn_recent", []).filter(id => listings.some(l => l.id === id));
 const todayISO = new Date().toISOString().slice(0,10);
+/* Demo mode: open the site with ?demo in the address to show how payment buttons work on example houses.
+   In demo mode the buttons never open WhatsApp or Facebook; they only show what would happen. */
+const demoMode = new URLSearchParams(location.search).has("demo");
 const fmtDate = iso => new Date(iso + "T12:00:00").toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
 const availText = l => !l.avail || l.avail <= todayISO ? "Now" : fmtDate(l.avail);
 const utilEst = l => Math.round((UTILITIES.base + l.sqft * UTILITIES.perSqft) / 10) * 10;
@@ -1032,6 +1040,7 @@ function writeUrl(){
   put("type", [...types].join(",")); put("region", $("#region").value); put("has", [...flags].join(","));
   put("kw", $("#kw").value.trim()); put("avail", $("#availBy").value); put("listed", +$("#listedIn").value ? $("#listedIn").value : "");
   put("sort", $("#sort").value !== "new" ? $("#sort").value : "");
+  if(demoMode) P.set("demo", "1");
   const qs = P.toString();
   try{ history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash); }catch{}
 }
@@ -1514,6 +1523,11 @@ const FB_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"
 function payChannels(l, what, label){
   const msg = `Hi GoldenNest, I'd like to ${what} for ${l.addr}, ${l.hood} (${fmt(l.price)}/mo). How do I pay?`;
   let out = "";
+  if(l.example){   // demo mode only: show the buttons, but they don't contact anyone
+    if(feeByWa()) out += `<button class="btn wa" type="button" data-demo-ch="WhatsApp" data-demo-msg="${esc(msg)}">${WA_ICON}${label} on WhatsApp</button>`;
+    if(msgrLink()) out += `<button class="btn fbm" type="button" data-demo-ch="Facebook Messenger" data-demo-msg="${esc(msg)}">${FB_ICON}${label} on Facebook</button>`;
+    return out;
+  }
   if(feeByWa()) out += `<a class="btn wa" href="https://wa.me/${waNumber()}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener noreferrer">${WA_ICON}${label} on WhatsApp</a>`;
   if(msgrLink()) out += `<a class="btn fbm" href="${esc(msgrLink())}" target="_blank" rel="noopener noreferrer" data-copy-msg="${esc(msg)}">${FB_ICON}${label} on Facebook</a>`;
   return out;
@@ -1525,6 +1539,17 @@ function feeButton(l){
   return payButton(PAYMENTS.applicationFee.link, `Pay ${fmt(fee)} application fee`, l, "");
 }
 function payBox(l){
+  if(l.example && demoMode) return `<div class="panel demo-panel"><span class="demo-tag">Demo</span>
+    <b>Apply and pay</b>
+    <div class="pay-row"><span>Application fee</span><b>${fmt(PAYMENTS.applicationFee.amount)}</b></div>
+    ${payChannels(l, `apply and pay the ${fmt(PAYMENTS.applicationFee.amount)} application fee`, `Pay ${fmt(PAYMENTS.applicationFee.amount)} fee`)}
+    <div class="pay-row" style="margin-top:14px"><span>First month's rent</span><b>${fmt(l.price)}</b></div>
+    <div class="pay-row"><span>Security deposit</span><b>${fmt(l.price * PAYMENTS.depositMonths)}</b></div>
+    <div class="pay-row total"><span>Due at move-in</span><b>${fmt(l.price + l.price * PAYMENTS.depositMonths)}</b></div>
+    ${payChannels(l, `arrange the ${fmt(l.price + l.price * PAYMENTS.depositMonths)} move-in payment (first month and deposit)`, "Pay move-in")}
+    <p class="demo-out" id="demoOut" aria-live="polite" hidden></p>
+    <p class="fine">Demo of an example home: these buttons show how payments work on real listings. They don't contact anyone and no payment is taken.</p>
+  </div>`;
   if(l.example) return `<div class="panel"><b>Costs for this home</b>
     <div class="pay-row"><span>Application fee</span><b>${fmt(PAYMENTS.applicationFee.amount)}</b></div>
     <div class="pay-row"><span>First month's rent</span><b>${fmt(l.price)}</b></div>
@@ -1818,6 +1843,8 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#cmpOpen")){ openCompare(); return; }
   if(e.target.closest("#cmpClear")){ [...compare].forEach(id => toggleCompare(id)); return; }
   if(e.target.closest("#clearRecent")){ recent = []; store.set("gn_recent", []); renderRecent(); return; }
+  const demo = e.target.closest("[data-demo-ch]");
+  if(demo){ const o = $("#demoOut"); o.hidden = false; o.innerHTML = `<b>Demo only.</b> On a real listing this opens ${esc(demo.dataset.demoCh)}${demo.dataset.demoCh === "WhatsApp" ? " with this message ready to send:" : ". The renter then writes, for example:"} <i>“${esc(demo.dataset.demoMsg)}”</i>`; return; }
   const share = e.target.closest("[data-share]"); if(share){ shareHouse(share.dataset.share); return; }
   const gs = e.target.closest("[data-gal-step]"); if(gs){ const box = gs.closest("[data-gal]"); galStep(box, +box.dataset.i + +gs.dataset.galStep); return; }
   const gg = e.target.closest("[data-gal-go]"); if(gg){ galStep($("[data-gal]"), +gg.dataset.galGo); return; }

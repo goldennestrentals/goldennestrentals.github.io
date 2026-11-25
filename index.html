@@ -1633,7 +1633,7 @@ const chatReady = () => hasTawk() || waNumber().length >= 8 || !!msgrLink();
 let chatAbout = null;
 function waLink(){
   const msg = chatAbout ? `Hi GoldenNest, I'm interested in ${chatAbout.addr}, ${chatAbout.hood} (${fmt(chatAbout.price)}/mo). Is it still available?`
-                        : "Hi GoldenNest, I have a question about renting a house.";
+                        : "Hi GoldenNest, I'd like to book a viewing. What houses do you have?";
   return `https://wa.me/${waNumber()}?text=${encodeURIComponent(msg)}`;
 }
 function openLiveChat(){

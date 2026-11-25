@@ -309,6 +309,8 @@ footer{margin-top:96px;background:var(--espresso);color:#cdbfa8;font-size:15px}
 .btn.wa{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
 .btn.fbm{background:#1877f2;border-color:#1877f2;color:#fff}
 .panel .btn.wa + .btn.fbm,.panel .btn.fbm + .btn.wa{margin-top:8px}
+.apply-step{display:flex;align-items:center;gap:10px;margin:14px 0 6px;font-weight:700;font-size:14px}
+.apply-step .n{width:24px;height:24px;border-radius:50%;background:var(--gold);color:var(--espresso);display:grid;place-items:center;font-size:12px;flex:none}
 .demo-panel{position:relative;border-style:dashed;border-color:var(--gold)}
 .demo-tag{position:absolute;right:14px;top:14px;background:var(--gold);color:var(--espresso);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
 .demo-out{margin:12px 0 0;background:var(--honey);border-radius:12px;padding:12px;font-size:14px;color:var(--ink-2)}
@@ -920,6 +922,10 @@ const UTILITIES = { base: 60, perSqft: 0.12 };
      a message saying which house the renter is applying for. You then send them
      payment details in WhatsApp. Until a WhatsApp number is set, it uses
      applicationFee.link instead (or shows "coming soon"). */
+/* Rental application form (e.g. Jotform). Shown as a "Fill out the rental application" button on
+   real houses only; example houses never show it. Leave "" to hide it. */
+const APPLICATION_FORM = "https://form.jotform.com/262595758352066";
+
 const PAYMENTS = {
   applicationFee: { amount: 50, link: "" },
   moveIn:         { link: "" },
@@ -1538,9 +1544,21 @@ function feeButton(l){
   if(ch) return ch + `<p class="fine">Opens a chat with a message about this house. Our team replies with how to pay.</p>`;
   return payButton(PAYMENTS.applicationFee.link, `Pay ${fmt(fee)} application fee`, l, "");
 }
+function appLink(){ try{ const u = new URL(APPLICATION_FORM || ""); return u.protocol === "https:" ? u.toString() : ""; }catch{ return ""; } }
+function appButton(l, demo){
+  if(!appLink()) return "";
+  const step = `<div class="apply-step"><span class="n">1</span><span>Fill out the rental application</span></div>`;
+  if(demo) return step + `<button class="btn dark" type="button" data-demo-ch="the rental application form" data-demo-msg="Rental application for ${esc(l.addr)}, ${esc(l.city)}, ${esc(l.state)}">Fill out the rental application</button>`;
+  const u = new URL(appLink());
+  return step + `<a class="btn dark" href="${esc(u.toString())}" target="_blank" rel="noopener noreferrer">Fill out the rental application ↗</a>
+    <p class="fine">Mention this home in the form: <b>${esc(l.addr)}, ${esc(l.city)}, ${esc(l.state)}</b>.</p>`;
+}
+const payStep = () => appLink() ? `<div class="apply-step"><span class="n">2</span><span>Pay the application fee</span></div>` : "";
 function payBox(l){
   if(l.example && demoMode) return `<div class="panel demo-panel"><span class="demo-tag">Demo</span>
     <b>Apply and pay</b>
+    ${appButton(l, true)}
+    ${payStep()}
     <div class="pay-row"><span>Application fee</span><b>${fmt(PAYMENTS.applicationFee.amount)}</b></div>
     ${payChannels(l, `apply and pay the ${fmt(PAYMENTS.applicationFee.amount)} application fee`, `Pay ${fmt(PAYMENTS.applicationFee.amount)} fee`)}
     <div class="pay-row" style="margin-top:14px"><span>First month's rent</span><b>${fmt(l.price)}</b></div>
@@ -1560,6 +1578,8 @@ function payBox(l){
   const ownLink = l.payLinks && l.payLinks.moveIn, moveLink = ownLink || PAYMENTS.moveIn.link;
   return `<div class="panel">
     <b>Apply and pay</b>
+    ${appButton(l, false)}
+    ${payStep()}
     <div class="pay-row"><span>Application fee</span><b>${fmt(fee)}</b></div>
     ${feeButton(l)}
     <div class="pay-row" style="margin-top:14px"><span>First month's rent</span><b>${fmt(l.price)}</b></div>
@@ -1844,7 +1864,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#cmpClear")){ [...compare].forEach(id => toggleCompare(id)); return; }
   if(e.target.closest("#clearRecent")){ recent = []; store.set("gn_recent", []); renderRecent(); return; }
   const demo = e.target.closest("[data-demo-ch]");
-  if(demo){ const o = $("#demoOut"); o.hidden = false; o.innerHTML = `<b>Demo only.</b> On a real listing this opens ${esc(demo.dataset.demoCh)}${demo.dataset.demoCh === "WhatsApp" ? " with this message ready to send:" : ", where the renter taps Message and writes, for example:"} <i>“${esc(demo.dataset.demoMsg)}”</i>`; return; }
+  if(demo){ const o = $("#demoOut"); o.hidden = false; o.innerHTML = `<b>Demo only.</b> On a real listing this opens ${esc(demo.dataset.demoCh)}${demo.dataset.demoCh === "WhatsApp" ? " with this message ready to send:" : demo.dataset.demoCh.includes("application") ? ", titled:" : ", where the renter taps Message and writes, for example:"} <i>“${esc(demo.dataset.demoMsg)}”</i>`; return; }
   const share = e.target.closest("[data-share]"); if(share){ shareHouse(share.dataset.share); return; }
   const gs = e.target.closest("[data-gal-step]"); if(gs){ const box = gs.closest("[data-gal]"); galStep(box, +box.dataset.i + +gs.dataset.galStep); return; }
   const gg = e.target.closest("[data-gal-go]"); if(gg){ galStep($("[data-gal]"), +gg.dataset.galGo); return; }
